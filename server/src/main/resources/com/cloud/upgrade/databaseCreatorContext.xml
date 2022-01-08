@@ -17,35 +17,11 @@
   under the License.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xmlns:context="http://www.springframework.org/schema/context"
-  xmlns:tx="http://www.springframework.org/schema/tx" 
-  xmlns:aop="http://www.springframework.org/schema/aop"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans
-                      http://www.springframework.org/schema/beans/spring-beans.xsd
-                      http://www.springframework.org/schema/tx 
-                      http://www.springframework.org/schema/tx/spring-tx.xsd
-                      http://www.springframework.org/schema/aop
-                      http://www.springframework.org/schema/aop/spring-aop.xsd
-                      http://www.springframework.org/schema/context
-                      http://www.springframework.org/schema/context/spring-context.xsd">
-
-  <context:annotation-config />
-
-  <!--
-    @DB support
-  -->
-  <bean id="componentContext" class="com.cloud.utils.component.ComponentContext" />
-  <bean id="transactionContextBuilder" class="com.cloud.utils.db.TransactionContextBuilder" />
-  <bean id="instantiatePostProcessor" class="com.cloud.utils.component.ComponentInstantiationPostProcessor">
-    <property name="Interceptors">
-        <list>
-            <ref bean="transactionContextBuilder" />
-        </list>
-    </property>
-  </bean>
-
-  <bean id="versionDaoImpl" class="com.cloud.upgrade.dao.VersionDaoImpl" />
-  <bean id="databaseUpgradeChecker" class="com.cloud.upgrade.DatabaseUpgradeChecker" />
-
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans                       http://www.springframework.org/schema/beans/spring-beans.xsd                       http://www.springframework.org/schema/tx                        http://www.springframework.org/schema/tx/spring-tx.xsd                       http://www.springframework.org/schema/aop                       http://www.springframework.org/schema/aop/spring-aop.xsd                       http://www.springframework.org/schema/context                       http://www.springframework.org/schema/context/spring-context.xsd">
+   <context:annotation-config/>
+   <bean class="com.cloud.conf.com.cloud.upgrade.DatabaseCreatorContext"/>
 </beans>

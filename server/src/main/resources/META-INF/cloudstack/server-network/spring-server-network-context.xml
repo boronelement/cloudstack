@@ -20,49 +20,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-                      http://www.springframework.org/schema/beans/spring-beans.xsd
-                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-                      http://www.springframework.org/schema/context
-                      http://www.springframework.org/schema/context/spring-context.xsd"
-                      >
-
-    <bean id="StorageNetworkGuru" class="com.cloud.network.guru.StorageNetworkGuru">
-        <property name="name" value="StorageNetworkGuru" />
-    </bean>
-    <bean id="ExternalGuestNetworkGuru" class="com.cloud.network.guru.ExternalGuestNetworkGuru">
-        <property name="name" value="ExternalGuestNetworkGuru" />
-    </bean>
-    <bean id="PublicNetworkGuru" class="com.cloud.network.guru.PublicNetworkGuru">
-        <property name="name" value="PublicNetworkGuru" />
-    </bean>
-    <bean id="PodBasedNetworkGuru" class="com.cloud.network.guru.PodBasedNetworkGuru">
-        <property name="name" value="PodBasedNetworkGuru" />
-    </bean>
-    <bean id="ControlNetworkGuru" class="com.cloud.network.guru.ControlNetworkGuru">
-        <property name="name" value="ControlNetworkGuru" />
-    </bean>
-    <bean id="DirectNetworkGuru" class="com.cloud.network.guru.DirectNetworkGuru">
-        <property name="name" value="DirectNetworkGuru" />
-    </bean>
-    <bean id="DirectPodBasedNetworkGuru" class="com.cloud.network.guru.DirectPodBasedNetworkGuru">
-        <property name="name" value="DirectPodBasedNetworkGuru" />
-    </bean>
-    <bean id="PrivateNetworkGuru" class="com.cloud.network.guru.PrivateNetworkGuru">
-        <property name="name" value="PrivateNetworkGuru" />
-    </bean>
-
-
-    <bean id="SecurityGroupProvider" class="com.cloud.network.element.SecurityGroupElement">
-        <property name="name" value="SecurityGroupProvider" />
-    </bean>
-
-    <bean id="VirtualRouter" class="com.cloud.network.element.VirtualRouterElement">
-        <property name="name" value="VirtualRouter" />
-    </bean>
-
-    <bean id="ConfigDrive" class="com.cloud.network.element.ConfigDriveNetworkElement">
-        <property name="name" value="ConfigDrive" />
-    </bean>
-
+       xsi:schemaLocation="http://www.springframework.org/schema/beans                       http://www.springframework.org/schema/beans/spring-beans.xsd                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd                       http://www.springframework.org/schema/context                       http://www.springframework.org/schema/context/spring-context.xsd">
+   <context:annotation-config/>
+   <bean class="com.cloud.conf.meta_inf.cloudstack.server_network.SpringServerNetworkContext"/>
 </beans>

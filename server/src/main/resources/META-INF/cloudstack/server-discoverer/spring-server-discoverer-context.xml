@@ -20,26 +20,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:aop="http://www.springframework.org/schema/aop"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-                      http://www.springframework.org/schema/beans/spring-beans.xsd
-                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-                      http://www.springframework.org/schema/context
-                      http://www.springframework.org/schema/context/spring-context.xsd"
-                      >
-
-
-    <bean id="KvmServerDiscoverer"
-        class="com.cloud.hypervisor.kvm.discoverer.KvmServerDiscoverer">
-        <property name="name" value="KVM Agent" />
-    </bean>
-
-    <bean id="LxcServerDiscoverer"
-        class="com.cloud.hypervisor.kvm.discoverer.LxcServerDiscoverer">
-        <property name="name" value="Lxc Discover" />
-    </bean>
-
-    <bean id="dummyHostDiscoverer" class="com.cloud.resource.DummyHostDiscoverer">
-        <property name="name" value="dummyHostDiscoverer" />
-    </bean>
-
+       xsi:schemaLocation="http://www.springframework.org/schema/beans                       http://www.springframework.org/schema/beans/spring-beans.xsd                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd                       http://www.springframework.org/schema/context                       http://www.springframework.org/schema/context/spring-context.xsd">
+   <context:annotation-config/>
+   <bean class="com.cloud.conf.meta_inf.cloudstack.server_discoverer.SpringServerDiscovererContext"/>
 </beans>

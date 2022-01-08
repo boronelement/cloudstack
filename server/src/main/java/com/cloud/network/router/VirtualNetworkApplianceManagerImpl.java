@@ -721,7 +721,7 @@ Configurable, StateListener<VirtualMachine.State, VirtualMachine.Event, VirtualM
         return true;
     }
 
-    protected VirtualNetworkApplianceManagerImpl() {
+    public VirtualNetworkApplianceManagerImpl() {
     }
 
     protected class NetworkUsageTask extends ManagedContextRunnable {
