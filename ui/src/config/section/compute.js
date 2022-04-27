@@ -107,6 +107,16 @@ export default {
           component: shallowRef(defineAsyncComponent(() => import('@/views/compute/EditVM.vue')))
         },
         {
+          api: 'retryDeployVirtualMachine',
+          icon: 'redo',
+          label: 'label.action.retry.deploy.instance',
+          dataView: true,
+          listView: false,
+          groupAction: true,
+          groupMap: (selection) => { return selection.map(x => { return { id: x } }) },
+          show: (record) => { return ['Error'].includes(record.state) }
+        },
+        {
           api: 'startVirtualMachine',
           icon: 'caret-right-outlined',
           label: 'label.action.start.instance',
