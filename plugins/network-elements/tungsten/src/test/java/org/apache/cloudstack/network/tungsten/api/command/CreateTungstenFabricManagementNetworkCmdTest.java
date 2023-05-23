@@ -18,6 +18,8 @@ package org.apache.cloudstack.network.tungsten.api.command;
 
 import com.cloud.dc.HostPodVO;
 import com.cloud.dc.dao.HostPodDao;
+import com.cloud.network.dao.PhysicalNetworkDao;
+import com.cloud.network.dao.PhysicalNetworkVO;
 import org.apache.cloudstack.api.response.SuccessResponse;
 import org.apache.cloudstack.network.tungsten.service.TungstenService;
 import org.junit.Assert;
@@ -33,6 +35,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
+import java.util.Arrays;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CreateTungstenFabricManagementNetworkCmd.class)
 public class CreateTungstenFabricManagementNetworkCmdTest {
@@ -41,6 +45,8 @@ public class CreateTungstenFabricManagementNetworkCmdTest {
     TungstenService tungstenService;
     @Mock
     HostPodDao podDao;
+    @Mock
+    PhysicalNetworkDao physicalNetworkDao;
 
     CreateTungstenFabricManagementNetworkCmd createTungstenFabricManagementNetworkCmd;
 
@@ -50,6 +56,7 @@ public class CreateTungstenFabricManagementNetworkCmdTest {
         createTungstenFabricManagementNetworkCmd = new CreateTungstenFabricManagementNetworkCmd();
         createTungstenFabricManagementNetworkCmd.tungstenService = tungstenService;
         createTungstenFabricManagementNetworkCmd.podDao = podDao;
+        createTungstenFabricManagementNetworkCmd.physicalNetworkDao = physicalNetworkDao;
         Whitebox.setInternalState(createTungstenFabricManagementNetworkCmd, "podId", 1L);
     }
 
@@ -58,6 +65,9 @@ public class CreateTungstenFabricManagementNetworkCmdTest {
         SuccessResponse successResponse = Mockito.mock(SuccessResponse.class);
         HostPodVO pod = Mockito.mock(HostPodVO.class);
         Mockito.when(podDao.findById(ArgumentMatchers.anyLong())).thenReturn(pod);
+        PhysicalNetworkVO physicalNetwork = Mockito.mock(PhysicalNetworkVO.class);
+        Mockito.when(physicalNetwork.getIsolationMethods()).thenReturn(Arrays.asList("TF"));
+        Mockito.when(physicalNetworkDao.listByZoneAndTrafficType(ArgumentMatchers.anyLong(), ArgumentMatchers.any())).thenReturn(Arrays.asList(physicalNetwork));
         Mockito.when(tungstenService.createManagementNetwork(ArgumentMatchers.anyLong())).thenReturn(true);
         Mockito.when(tungstenService.addManagementNetworkSubnet(ArgumentMatchers.any())).thenReturn(true);
         PowerMockito.whenNew(SuccessResponse.class).withAnyArguments().thenReturn(successResponse);

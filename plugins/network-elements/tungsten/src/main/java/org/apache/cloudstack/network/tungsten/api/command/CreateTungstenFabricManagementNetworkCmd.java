@@ -16,6 +16,8 @@
 // under the License.
 package org.apache.cloudstack.network.tungsten.api.command;
 
+import java.util.List;
+
 import com.cloud.dc.HostPodVO;
 import com.cloud.dc.dao.HostPodDao;
 import com.cloud.exception.ConcurrentOperationException;
@@ -23,6 +25,9 @@ import com.cloud.exception.InsufficientCapacityException;
 import com.cloud.exception.NetworkRuleConflictException;
 import com.cloud.exception.ResourceAllocationException;
 import com.cloud.exception.ResourceUnavailableException;
+import com.cloud.network.Networks;
+import com.cloud.network.dao.PhysicalNetworkDao;
+import com.cloud.network.dao.PhysicalNetworkVO;
 import com.cloud.user.Account;
 import org.apache.cloudstack.api.APICommand;
 import org.apache.cloudstack.api.ApiConstants;
@@ -50,6 +55,9 @@ public class CreateTungstenFabricManagementNetworkCmd extends BaseCmd {
     @Inject
     TungstenService tungstenService;
 
+    @Inject
+    PhysicalNetworkDao physicalNetworkDao;
+
     @Parameter(name = ApiConstants.POD_ID, type = CommandType.UUID, entityType = PodResponse.class, required = true,
         description = "the ID of pod")
     private Long podId;
@@ -67,6 +75,13 @@ public class CreateTungstenFabricManagementNetworkCmd extends BaseCmd {
         ConcurrentOperationException, ResourceAllocationException, NetworkRuleConflictException {
         HostPodVO pod = podDao.findById(podId);
 
+        List<PhysicalNetworkVO> physicalNetworks = physicalNetworkDao.listByZoneAndTrafficType(pod.getDataCenterId(), Networks.TrafficType.Management);
+        if (physicalNetworks.isEmpty() || !physicalNetworks.get(0).getIsolationMethods().contains("TF")) {
+            SuccessResponse response = new SuccessResponse(getCommandName());
+            response.setDisplayText("Tungsten-Fabric management network is not created as the isolation method is not TF");
+            setResponseObject(response);
+            return;
+        }
         if (!tungstenService.createManagementNetwork(pod.getDataCenterId())) {
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR,
                 "Unable to create Tungsten-Fabric management network");

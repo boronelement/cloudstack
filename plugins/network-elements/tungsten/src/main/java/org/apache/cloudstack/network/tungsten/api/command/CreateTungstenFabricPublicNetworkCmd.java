@@ -26,6 +26,8 @@ import com.cloud.exception.ResourceUnavailableException;
 import com.cloud.network.Network;
 import com.cloud.network.NetworkModel;
 import com.cloud.network.Networks;
+import com.cloud.network.dao.PhysicalNetworkDao;
+import com.cloud.network.dao.PhysicalNetworkVO;
 import com.cloud.user.Account;
 import com.cloud.utils.db.SearchCriteria;
 import org.apache.cloudstack.api.APICommand;
@@ -58,6 +60,9 @@ public class CreateTungstenFabricPublicNetworkCmd extends BaseCmd {
     @Inject
     TungstenService tungstenService;
 
+    @Inject
+    PhysicalNetworkDao physicalNetworkDao;
+
     @Parameter(name = ApiConstants.ZONE_ID, type = CommandType.UUID, entityType = ZoneResponse.class, required = true
         , description = "the ID of zone")
     private Long zoneId;
@@ -73,6 +78,12 @@ public class CreateTungstenFabricPublicNetworkCmd extends BaseCmd {
     @Override
     public void execute() throws ResourceUnavailableException, InsufficientCapacityException, ServerApiException,
         ConcurrentOperationException, ResourceAllocationException, NetworkRuleConflictException {
+        List<PhysicalNetworkVO> physicalNetworks = physicalNetworkDao.listByZoneAndTrafficType(zoneId, Networks.TrafficType.Public);
+        if (physicalNetworks.isEmpty() || !physicalNetworks.get(0).getIsolationMethods().contains("TF")) {
+            SuccessResponse response = new SuccessResponse(getCommandName());
+            response.setDisplayText("Tungsten-Fabric public network is not created as the isolation method is not TF");
+            setResponseObject(response);
+        }
         Network publicNetwork = networkModel.getSystemNetworkByZoneAndTrafficType(zoneId, Networks.TrafficType.Public);
         SearchCriteria<VlanVO> sc = vlanDao.createSearchCriteria();
         sc.setParameters("network_id", publicNetwork.getId());
