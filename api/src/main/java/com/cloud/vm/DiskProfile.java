@@ -44,6 +44,7 @@ public class DiskProfile {
     private String cacheMode;
     private Long minIops;
     private Long maxIops;
+    private Long newDiskOfferingId;
     private boolean requiresEncryption;
 
     private HypervisorType hyperType;
@@ -254,6 +255,13 @@ public class DiskProfile {
         this.maxIops = maxIops;
     }
 
+    public Long getNewDiskOfferingId() {
+        return newDiskOfferingId;
+    }
+
+    public void setNewDiskOfferingId(Long newDiskOfferingId) {
+        this.newDiskOfferingId = newDiskOfferingId;
+    }
     public boolean requiresEncryption() { return requiresEncryption; }
 
     public void setEncryption(boolean encrypt) { this.requiresEncryption = encrypt; }
