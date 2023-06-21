@@ -35,6 +35,10 @@ public class Pair<T, U> implements Serializable {
         this.u = u;
     }
 
+    public static <T, U> Pair<T, U> of(T t, U u) {
+        return new Pair<>(t, u);
+    }
+
     public T first() {
         return t;
     }
@@ -61,8 +65,7 @@ public class Pair<T, U> implements Serializable {
     @Override
     // Note: This means any two pairs with null for both values will match each
     // other but what can I do?  This is due to stupid type erasure.
-        public
-        int hashCode() {
+    public int hashCode() {
         return (t != null ? t.hashCode() : 0) | (u != null ? u.hashCode() : 0);
     }
 
