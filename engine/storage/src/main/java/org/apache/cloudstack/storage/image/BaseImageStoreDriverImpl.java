@@ -99,7 +99,7 @@ public abstract class BaseImageStoreDriverImpl implements ImageStoreDriver {
     @Inject
     protected VMTemplateDao _templateDao;
     @Inject
-    DownloadMonitor _downloadMonitor;
+    protected DownloadMonitor _downloadMonitor;
     @Inject
     VolumeDao volumeDao;
     @Inject
@@ -170,6 +170,14 @@ public abstract class BaseImageStoreDriverImpl implements ImageStoreDriver {
     protected Long getMaxTemplateSizeInBytes() {
         try {
             return Long.parseLong(configDao.getValue("max.template.iso.size")) * 1024L * 1024L * 1024L;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    protected Long getMaxVolumeSizeInBytes() {
+        try {
+            return Long.parseLong(configDao.getValue("storage.max.volume.upload.size")) * 1024L * 1024L * 1024L;
         } catch (NumberFormatException e) {
             return null;
         }

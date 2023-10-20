@@ -751,6 +751,8 @@ public class VolumeObject implements VolumeInfo {
 
         volumeDataStoreVo.setInstallPath(downloadAnswer.getInstallPath());
         volumeDataStoreVo.setChecksum(downloadAnswer.getCheckSum());
+        volumeDataStoreVo.setSize(downloadAnswer.getTemplateSize());
+        volumeDataStoreVo.setPhysicalSize(downloadAnswer.getTemplatePhySicalSize());
         volumeStoreDao.update(volumeDataStoreVo.getId(), volumeDataStoreVo);
 
         String newValues = ReflectionToStringBuilderUtils.reflectOnlySelectedFields(volumeDataStoreVo, "installPath", "checksum");

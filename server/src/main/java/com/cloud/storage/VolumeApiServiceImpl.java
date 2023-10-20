@@ -2227,6 +2227,18 @@ public class VolumeApiServiceImpl extends ManagerBase implements VolumeApiServic
         StoragePoolVO destPrimaryStorage = null;
         if (existingVolumeOfVm != null && !existingVolumeOfVm.getState().equals(Volume.State.Allocated)) {
             destPrimaryStorage = _storagePoolDao.findById(existingVolumeOfVm.getPoolId());
+            if(destPrimaryStorage.getPodId() == null) {
+                destPrimaryStorage.setPodId(vm.getPodIdToDeployIn());
+            }
+            if(destPrimaryStorage.getClusterId() == null) {
+                HostVO hostVO = null;
+                if (vm.getHostId() != null) {
+                    hostVO = _hostDao.findById(vm.getHostId());
+                } else {
+                    hostVO = _hostDao.findById(vm.getLastHostId());
+                }
+                destPrimaryStorage.setClusterId(hostVO.getClusterId());
+            }
             if (s_logger.isTraceEnabled() && destPrimaryStorage != null) {
                 s_logger.trace(String.format("decided on target storage: %s/%s", destPrimaryStorage.getName(), destPrimaryStorage.getUuid()));
             }
@@ -3975,6 +3987,7 @@ public class VolumeApiServiceImpl extends ManagerBase implements VolumeApiServic
         volumeStoreRef.setDownloadState(VMTemplateStorageResourceAssoc.Status.DOWNLOADED);
         volumeStoreRef.setDownloadPercent(100);
         volumeStoreRef.setZoneId(zoneId);
+        volumeStoreRef.setSize(vol.getSize());
 
         _volumeStoreDao.update(volumeStoreRef.getId(), volumeStoreRef);
 
