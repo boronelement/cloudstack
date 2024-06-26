@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import javax.inject.Inject;
 
 import org.apache.cloudstack.api.ApiCommandResourceType;
@@ -37,7 +38,9 @@ import org.apache.cloudstack.backup.veeam.VeeamClient;
 import org.apache.cloudstack.backup.veeam.api.Job;
 import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.Configurable;
+import org.apache.cloudstack.utils.volume.VirtualMachineDiskInfo;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import com.cloud.agent.AgentManager;
@@ -51,6 +54,9 @@ import com.cloud.hypervisor.vmware.VmwareDatacenterZoneMap;
 import com.cloud.dc.dao.VmwareDatacenterDao;
 import com.cloud.hypervisor.vmware.dao.VmwareDatacenterZoneMapDao;
 import com.cloud.user.User;
+import com.cloud.serializer.GsonHelper;
+import com.cloud.storage.VolumeVO;
+import com.cloud.storage.dao.VolumeDao;
 import com.cloud.utils.Pair;
 import com.cloud.utils.component.AdapterBase;
 import com.cloud.utils.db.Transaction;
@@ -64,6 +70,7 @@ import com.cloud.vm.dao.VMInstanceDao;
 
 public class VeeamBackupProvider extends AdapterBase implements BackupProvider, Configurable {
 
+    private static final Gson GSON = GsonHelper.getGson();
     public static final String BACKUP_IDENTIFIER = "-CSBKP-";
 
     public ConfigKey<String> VeeamUrl = new ConfigKey<>("Advanced", String.class,
@@ -109,6 +116,8 @@ public class VeeamBackupProvider extends AdapterBase implements BackupProvider, 
     private AgentManager agentMgr;
     @Inject
     private VirtualMachineManager virtualMachineManager;
+    @Inject
+    private VolumeDao volumeDao;
 
     protected VeeamClient getClient(final Long zoneId) {
         try {
@@ -291,10 +300,31 @@ public class VeeamBackupProvider extends AdapterBase implements BackupProvider, 
     }
 
     @Override
-    public Pair<Boolean, String> restoreBackedUpVolume(Backup backup, String volumeUuid, String hostIp, String dataStoreUuid) {
+    public Pair<Boolean, String> restoreBackedUpVolume(Backup backup, String volumeUuid, String host, String dataStore, VirtualMachine vm) {
+        Pair<Boolean, String> result = new Pair<>(false, "");
         final Long zoneId = backup.getZoneId();
         final String restorePointId = backup.getExternalId();
-        return getClient(zoneId).restoreVMToDifferentLocation(restorePointId, hostIp, dataStoreUuid);
+
+        VMInstanceVO vmVO = vmInstanceDao.findById(backup.getVmId());
+        VolumeVO volumeVO = volumeDao.findByUuid(volumeUuid);
+        long totalDeviceIds = volumeDao.findByInstance(vm.getId()).stream().mapToLong(VolumeVO::getDeviceId).max().orElse(0L);
+        long newDeviceId = totalDeviceIds + 1;
+        logger.debug("VM [{}] has [{}] deviceIds. Trying to restore volume [{}] using restorePoint [{}] and with [{}] as the new deviceId.", vm.getUuid(),
+                totalDeviceIds, volumeUuid, restorePointId, newDeviceId);
+
+        VirtualMachineDiskInfo fromJson = GSON.fromJson(volumeVO.getChainInfo(), VirtualMachineDiskInfo.class);
+        String type = fromJson.getControllerFromDeviceBusName().toUpperCase();
+        String virtualDeviceNode = StringUtils.substringAfter(fromJson.getDiskDeviceBusName(), ":");
+        for (String name : fromJson.getDiskChain()) {
+            String diskName = StringUtils.substringAfter(name, "/");
+            try {
+                result = getClient(zoneId).restoreVolume(volumeUuid, vmVO.getUuid(), restorePointId, host, dataStore, type, virtualDeviceNode, diskName, newDeviceId, vm);
+            } catch (Exception e) {
+                logger.error("Failed to restore volume [{}] in VM [{}], with type [{}], node [{}] and disk name [{}], using target host [{}] and datastore [{}] due to [{}].",
+                        volumeUuid, vmVO.getUuid(), type, virtualDeviceNode, diskName, host, dataStore, e.getMessage(), e);
+            }
+        }
+        return result;
     }
 
     @Override
