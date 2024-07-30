@@ -66,12 +66,13 @@
                       return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
                     }"
                     :loading="field.loading"
-                    @input="onchange($event, field.name)">
+                    @input="onchange($event, field.name)"
+                    @change="onSelectFieldChange(field.name)">
                     <a-select-option
                       v-for="(opt, idx) in field.opts"
                       :key="idx"
-                      :value="opt.id"
-                      :label="$t(opt.path || opt.name)">
+                      :value="['account'].includes(field.name) ? opt.name : opt.id"
+                      :label="$t((['storageid'].includes(field.name) || !opt.path) ? opt.name : opt.path)">
                       <div>
                         <span v-if="(field.name.startsWith('zone'))">
                           <span v-if="opt.icon">
@@ -88,7 +89,7 @@
                         <span v-if="(field.name.startsWith('managementserver'))">
                           <status :text="opt.state" />
                         </span>
-                        {{ $t(opt.path || opt.name) }}
+                        {{ $t((['storageid'].includes(field.name) || !opt.path) ? opt.name : opt.path) }}
                       </div>
                     </a-select-option>
                   </a-select>
@@ -242,6 +243,11 @@ export default {
     onchange: async function (event, fieldname) {
       this.fetchDynamicFieldData(fieldname, event.target.value)
     },
+    onSelectFieldChange (fieldname) {
+      if (fieldname === 'domainid') {
+        this.fetchDynamicFieldData('account')
+      }
+    },
     onVisibleForm () {
       this.visibleFilter = !this.visibleFilter
       if (!this.visibleFilter) return
@@ -286,7 +292,7 @@ export default {
         }
         if (['zoneid', 'domainid', 'imagestoreid', 'storageid', 'state', 'account', 'hypervisor', 'level',
           'clusterid', 'podid', 'groupid', 'entitytype', 'accounttype', 'systemvmtype', 'scope', 'provider',
-          'type', 'scope', 'managementserverid'].includes(item)
+          'type', 'scope', 'managementserverid', 'serviceofferingid', 'diskofferingid'].includes(item)
         ) {
           type = 'list'
         } else if (item === 'tags') {
@@ -406,6 +412,8 @@ export default {
       let clusterIndex = -1
       let groupIndex = -1
       let managementServerIdIndex = -1
+      let serviceOfferingIndex = -1
+      let diskOfferingIndex = -1
 
       if (arrayField.includes('type')) {
         if (this.$route.path === '/alert') {
@@ -479,6 +487,18 @@ export default {
         promises.push(await this.fetchManagementServers(searchKeyword))
       }
 
+      if (arrayField.includes('serviceofferingid')) {
+        serviceOfferingIndex = this.fields.findIndex(item => item.name === 'serviceofferingid')
+        this.fields[serviceOfferingIndex].loading = true
+        promises.push(await this.fetchServiceOfferings(searchKeyword))
+      }
+
+      if (arrayField.includes('diskofferingid')) {
+        diskOfferingIndex = this.fields.findIndex(item => item.name === 'diskofferingid')
+        this.fields[diskOfferingIndex].loading = true
+        promises.push(await this.fetchDiskOfferings(searchKeyword))
+      }
+
       Promise.all(promises).then(response => {
         if (typeIndex > -1) {
           const types = response.filter(item => item.type === 'type')
@@ -540,10 +560,25 @@ export default {
             this.fields[groupIndex].opts = this.sortArray(groups[0].data)
           }
         }
+
         if (managementServerIdIndex > -1) {
           const managementServers = response.filter(item => item.type === 'managementserverid')
           if (managementServers && managementServers.length > 0) {
             this.fields[managementServerIdIndex].opts = this.sortArray(managementServers[0].data)
+          }
+        }
+
+        if (serviceOfferingIndex > -1) {
+          const serviceOfferings = response.filter(item => item.type === 'serviceofferingid')
+          if (serviceOfferings && serviceOfferings.length > 0) {
+            this.fields[serviceOfferingIndex].opts = this.sortArray(serviceOfferings[0].data)
+          }
+        }
+
+        if (diskOfferingIndex > -1) {
+          const diskOfferings = response.filter(item => item.type === 'diskofferingid')
+          if (diskOfferings && diskOfferings.length > 0) {
+            this.fields[diskOfferingIndex].opts = this.sortArray(diskOfferings[0].data)
           }
         }
       }).finally(() => {
@@ -555,6 +590,9 @@ export default {
         }
         if (domainIndex > -1) {
           this.fields[domainIndex].loading = false
+        }
+        if (accountIndex > -1) {
+          this.fields[accountIndex].loading = false
         }
         if (imageStoreIndex > -1) {
           this.fields[imageStoreIndex].loading = false
@@ -574,7 +612,15 @@ export default {
         if (managementServerIdIndex > -1) {
           this.fields[managementServerIdIndex].loading = false
         }
-        this.fillFormFieldValues()
+        if (serviceOfferingIndex > -1) {
+          this.fields[serviceOfferingIndex].loading = false
+        }
+        if (diskOfferingIndex > -1) {
+          this.fields[diskOfferingIndex].loading = false
+        }
+        if (Array.isArray(arrayField)) {
+          this.fillFormFieldValues()
+        }
       })
     },
     initFormFieldData () {
@@ -585,6 +631,9 @@ export default {
       this.fetchDynamicFieldData(arrayField)
     },
     sortArray (data, key = 'name') {
+      if (!data) {
+        return []
+      }
       return data.sort(function (a, b) {
         if (a[key] < b[key]) { return -1 }
         if (a[key] > b[key]) { return 1 }
@@ -634,8 +683,15 @@ export default {
     },
     fetchAccounts (searchKeyword) {
       return new Promise((resolve, reject) => {
-        api('listAccounts', { listAll: true, showicon: true, keyword: searchKeyword }).then(json => {
-          const account = json.listaccountsresponse.account
+        const params = { listAll: true, isrecursive: false, showicon: true, keyword: searchKeyword }
+        if (this.form.domainid) {
+          params.domainid = this.form.domainid
+        }
+        api('listAccounts', params).then(json => {
+          var account = json.listaccountsresponse.account
+          if (this.form.domainid) {
+            account = account.filter(a => a.domainid === this.form.domainid)
+          }
           resolve({
             type: 'account',
             data: account
@@ -717,6 +773,32 @@ export default {
           resolve({
             type: 'groupid',
             data: instancegroups
+          })
+        }).catch(error => {
+          reject(error.response.headers['x-description'])
+        })
+      })
+    },
+    fetchServiceOfferings (searchKeyword) {
+      return new Promise((resolve, reject) => {
+        api('listServiceOfferings', { listAll: true, keyword: searchKeyword }).then(json => {
+          const serviceOfferings = json.listserviceofferingsresponse.serviceoffering
+          resolve({
+            type: 'serviceofferingid',
+            data: serviceOfferings
+          })
+        }).catch(error => {
+          reject(error.response.headers['x-description'])
+        })
+      })
+    },
+    fetchDiskOfferings (searchKeyword) {
+      return new Promise((resolve, reject) => {
+        api('listDiskOfferings', { listAll: true, keyword: searchKeyword }).then(json => {
+          const diskOfferings = json.listdiskofferingsresponse.diskoffering
+          resolve({
+            type: 'diskofferingid',
+            data: diskOfferings
           })
         }).catch(error => {
           reject(error.response.headers['x-description'])
