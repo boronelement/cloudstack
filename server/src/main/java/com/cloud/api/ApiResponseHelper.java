@@ -2632,10 +2632,7 @@ public class ApiResponseHelper implements ResponseGenerator {
                 Domain domain = ApiDBUtils.findDomainById(domainNetworkDetails.first());
                 if (domain != null) {
                     response.setDomainId(domain.getUuid());
-
-                    StringBuilder domainPath = new StringBuilder("ROOT");
-                    (domainPath.append(domain.getPath())).deleteCharAt(domainPath.length() - 1);
-                    response.setDomainPath(domainPath.toString());
+                    response.setDomainPath(getDomainPath(domain.getPath()));
                 }
             }
             response.setSubdomainAccess(domainNetworkDetails.second());
@@ -2647,6 +2644,7 @@ public class ApiResponseHelper implements ResponseGenerator {
             if (domain != null) {
                 response.setDomainId(domain.getUuid());
                 response.setDomainName(domain.getName());
+                response.setDomainPath(getDomainPath(domain.getPath()));
             }
 
         }
@@ -2895,6 +2893,7 @@ public class ApiResponseHelper implements ResponseGenerator {
         Domain domain = ApiDBUtils.findDomainById(object.getDomainId());
         response.setDomainId(domain.getUuid());
         response.setDomainName(domain.getName());
+        response.setDomainPath(getDomainPath(domain.getPath()));
     }
 
     private void populateOwner(ControlledViewEntityResponse response, ControlledEntity object) {
@@ -5253,7 +5252,7 @@ public class ApiResponseHelper implements ResponseGenerator {
         bucketResponse.setCreated(bucket.getCreated());
         bucketResponse.setState(bucket.getState());
         bucketResponse.setSize(bucket.getSize());
-        if(bucket.getQuota() != null) {
+        if (bucket.getQuota() != null) {
             bucketResponse.setQuota(bucket.getQuota());
         }
         bucketResponse.setVersioning(bucket.isVersioning());
@@ -5270,5 +5269,15 @@ public class ApiResponseHelper implements ResponseGenerator {
         bucketResponse.setProvider(objectStoreVO.getProviderName());
         populateAccount(bucketResponse, bucket.getAccountId());
         return bucketResponse;
+    }
+
+    private String getDomainPath(String path){
+        StringBuilder domainPath = new StringBuilder();
+       if (StringUtils.isEmpty(path) || path.equals("/")) {
+            domainPath.append("/");
+        } else {
+            (domainPath.append(path)).deleteCharAt(domainPath.length() - 1);
+        }
+        return domainPath.toString();
     }
 }
