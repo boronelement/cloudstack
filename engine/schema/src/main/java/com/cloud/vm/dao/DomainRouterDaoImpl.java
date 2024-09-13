@@ -18,6 +18,7 @@ package com.cloud.vm.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -48,6 +49,7 @@ import com.cloud.utils.db.TransactionLegacy;
 import com.cloud.utils.db.UpdateBuilder;
 import com.cloud.vm.DomainRouterVO;
 import com.cloud.vm.VirtualMachine.State;
+import com.cloud.vm.UserVmDetailVO;
 
 @Component
 @DB
@@ -70,6 +72,9 @@ public class DomainRouterDaoImpl extends GenericDaoBase<DomainRouterVO, Long> im
     @Inject
     NetworkOfferingDao _offDao;
     protected SearchBuilder<DomainRouterVO> VpcSearch;
+
+    @Inject
+    protected UserVmDetailsDao _detailsDao;
 
     public DomainRouterDaoImpl() {
     }
@@ -449,5 +454,28 @@ public class DomainRouterDaoImpl extends GenericDaoBase<DomainRouterVO, Long> im
         sc.setParameters("vpcId", vpcId);
         sc.setParameters("role", Role.VIRTUAL_ROUTER);
         return listIncludingRemovedBy(sc);
+    }
+
+    @Override
+    public void saveDetails(DomainRouterVO vm) {
+        saveDetails(vm, new ArrayList<String>());
+    }
+
+    @Override
+    public void saveDetails(DomainRouterVO vm, List<String> hiddenDetails) {
+        Map<String, String> detailsStr = vm.getDetails();
+        if (detailsStr == null) {
+            return;
+        }
+
+        final Map<String, Boolean> visibilityMap = _detailsDao.listDetailsVisibility(vm.getId());
+
+        List<UserVmDetailVO> details = new ArrayList<UserVmDetailVO>();
+        for (Map.Entry<String, String> entry : detailsStr.entrySet()) {
+            boolean display = !hiddenDetails.contains(entry.getKey()) && visibilityMap.getOrDefault(entry.getKey(), true);
+            details.add(new UserVmDetailVO(vm.getId(), entry.getKey(), entry.getValue(), display));
+        }
+
+        _detailsDao.saveDetails(details);
     }
 }

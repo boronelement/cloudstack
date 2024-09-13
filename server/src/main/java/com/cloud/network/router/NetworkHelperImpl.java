@@ -531,6 +531,8 @@ public class NetworkHelperImpl implements NetworkHelper {
                     continue;
                 }
 
+                _templateDao.loadDetails(template);
+
                 final boolean offerHA = routerOffering.isOfferHA();
 
                 // routerDeploymentDefinition.getVpc().getId() ==> do not use
@@ -553,6 +555,9 @@ public class NetworkHelperImpl implements NetworkHelper {
                 router.setRole(Role.VIRTUAL_ROUTER);
                 router.setLimitCpuUse(routerOffering.getLimitCpuUse());
                 router = _routerDao.persist(router);
+
+                router.setDetails(template.getDetails());
+                _routerDao.saveDetails(router);
 
                 reallocateRouterNetworks(routerDeploymentDefinition, router, template, null);
                 router = _routerDao.findById(router.getId());

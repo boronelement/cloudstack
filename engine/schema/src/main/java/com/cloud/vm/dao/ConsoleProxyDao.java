@@ -29,6 +29,10 @@ public interface ConsoleProxyDao extends GenericDao<ConsoleProxyVO, Long> {
 
     public void update(long id, int activeSession, Date updateTime, byte[] sessionDetails);
 
+    public void saveDetails(ConsoleProxyVO vm);
+
+    public void saveDetails(ConsoleProxyVO vm, List<String> hiddenDetails);
+
     public List<ConsoleProxyVO> getProxyListInStates(long dataCenterId, State... states);
 
     public List<ConsoleProxyVO> getProxyListInStates(State... states);
