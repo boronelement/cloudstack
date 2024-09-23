@@ -672,7 +672,7 @@ public class SecondaryStorageManagerImpl extends ManagerBase implements Secondar
         secStorageVm.setLimitCpuUse(serviceOffering.getLimitCpuUse());
         secStorageVm = _secStorageVmDao.persist(secStorageVm);
         secStorageVm.setDetails(template.getDetails());
-        _secStorageVmDao.saveDetails(secStorageVm);
+        _vmDetailsDao.saveDetails(secStorageVm);
         try {
             _itMgr.allocate(name, template, serviceOffering, networks, plan, null);
             secStorageVm = _secStorageVmDao.findById(secStorageVm.getId());

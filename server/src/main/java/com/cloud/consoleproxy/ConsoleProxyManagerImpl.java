@@ -720,7 +720,7 @@ public class ConsoleProxyManagerImpl extends ManagerBase implements ConsoleProxy
         proxy.setLimitCpuUse(serviceOffering.getLimitCpuUse());
         proxy = consoleProxyDao.persist(proxy);
         proxy.setDetails(template.getDetails());
-        consoleProxyDao.saveDetails(proxy);
+        userVmDetailsDao.saveDetails(proxy);
         try {
             virtualMachineManager.allocate(name, template, serviceOffering, networks, plan, null);
         } catch (InsufficientCapacityException e) {

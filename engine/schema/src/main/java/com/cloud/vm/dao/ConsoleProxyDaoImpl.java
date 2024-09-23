@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 import org.springframework.stereotype.Component;
@@ -37,9 +36,6 @@ import com.cloud.utils.db.TransactionLegacy;
 import com.cloud.utils.db.UpdateBuilder;
 import com.cloud.vm.ConsoleProxyVO;
 import com.cloud.vm.VirtualMachine.State;
-import com.cloud.vm.UserVmDetailVO;
-
-import javax.inject.Inject;
 
 @Component
 public class ConsoleProxyDaoImpl extends GenericDaoBase<ConsoleProxyVO, Long> implements ConsoleProxyDao {
@@ -94,9 +90,6 @@ public class ConsoleProxyDaoImpl extends GenericDaoBase<ConsoleProxyVO, Long> im
     protected SearchBuilder<ConsoleProxyVO> StateChangeSearch;
 
     protected final Attribute _updateTimeAttr;
-
-    @Inject
-    protected UserVmDetailsDao _detailsDao;
 
     public ConsoleProxyDaoImpl() {
         DataCenterStatusSearch = createSearchBuilder();
@@ -337,28 +330,5 @@ public class ConsoleProxyDaoImpl extends GenericDaoBase<ConsoleProxyVO, Long> im
         sc.setParameters("lastHost", hostId);
         sc.setParameters("state", State.Stopped);
         return listBy(sc);
-    }
-
-    @Override
-    public void saveDetails(ConsoleProxyVO vm) {
-        saveDetails(vm, new ArrayList<String>());
-    }
-
-    @Override
-    public void saveDetails(ConsoleProxyVO vm, List<String> hiddenDetails) {
-        Map<String, String> detailsStr = vm.getDetails();
-        if (detailsStr == null) {
-            return;
-        }
-
-        final Map<String, Boolean> visibilityMap = _detailsDao.listDetailsVisibility(vm.getId());
-
-        List<UserVmDetailVO> details = new ArrayList<UserVmDetailVO>();
-        for (Map.Entry<String, String> entry : detailsStr.entrySet()) {
-            boolean display = !hiddenDetails.contains(entry.getKey()) && visibilityMap.getOrDefault(entry.getKey(), true);
-            details.add(new UserVmDetailVO(vm.getId(), entry.getKey(), entry.getValue(), display));
-        }
-
-        _detailsDao.saveDetails(details);
     }
 }

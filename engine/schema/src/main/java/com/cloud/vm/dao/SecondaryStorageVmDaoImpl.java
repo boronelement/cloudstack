@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 import org.springframework.stereotype.Component;
@@ -35,9 +34,6 @@ import com.cloud.utils.db.UpdateBuilder;
 import com.cloud.vm.SecondaryStorageVm;
 import com.cloud.vm.SecondaryStorageVmVO;
 import com.cloud.vm.VirtualMachine.State;
-import com.cloud.vm.UserVmDetailVO;
-
-import javax.inject.Inject;
 
 @Component
 public class SecondaryStorageVmDaoImpl extends GenericDaoBase<SecondaryStorageVmVO, Long> implements SecondaryStorageVmDao {
@@ -52,9 +48,6 @@ public class SecondaryStorageVmDaoImpl extends GenericDaoBase<SecondaryStorageVm
     protected SearchBuilder<SecondaryStorageVmVO> InstanceSearch;
 
     protected final Attribute _updateTimeAttr;
-
-    @Inject
-    protected UserVmDetailsDao _detailsDao;
 
     public SecondaryStorageVmDaoImpl() {
         DataCenterStatusSearch = createSearchBuilder();
@@ -272,28 +265,5 @@ public class SecondaryStorageVmDaoImpl extends GenericDaoBase<SecondaryStorageVm
         }
 
         return l;
-    }
-
-    @Override
-    public void saveDetails(SecondaryStorageVmVO vm) {
-        saveDetails(vm, new ArrayList<String>());
-    }
-
-    @Override
-    public void saveDetails(SecondaryStorageVmVO vm, List<String> hiddenDetails) {
-        Map<String, String> detailsStr = vm.getDetails();
-        if (detailsStr == null) {
-            return;
-        }
-
-        final Map<String, Boolean> visibilityMap = _detailsDao.listDetailsVisibility(vm.getId());
-
-        List<UserVmDetailVO> details = new ArrayList<UserVmDetailVO>();
-        for (Map.Entry<String, String> entry : detailsStr.entrySet()) {
-            boolean display = !hiddenDetails.contains(entry.getKey()) && visibilityMap.getOrDefault(entry.getKey(), true);
-            details.add(new UserVmDetailVO(vm.getId(), entry.getKey(), entry.getValue(), display));
-        }
-
-        _detailsDao.saveDetails(details);
     }
 }

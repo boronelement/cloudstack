@@ -25,10 +25,6 @@ import com.cloud.vm.VirtualMachine.State;
 
 public interface SecondaryStorageVmDao extends GenericDao<SecondaryStorageVmVO, Long> {
 
-    public void saveDetails(SecondaryStorageVmVO vm);
-
-    public void saveDetails(SecondaryStorageVmVO vm, List<String> hiddenDetails);
-
     public List<SecondaryStorageVmVO> getSecStorageVmListInStates(SecondaryStorageVm.Role role, long dataCenterId, State... states);
 
     public List<SecondaryStorageVmVO> getSecStorageVmListInStates(SecondaryStorageVm.Role role, State... states);
