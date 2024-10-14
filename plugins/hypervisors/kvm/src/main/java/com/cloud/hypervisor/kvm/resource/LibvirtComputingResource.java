@@ -3373,7 +3373,7 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
         List<DiskDef> disks = getDisks(conn, vmName);
         DiskDef configdrive = null;
         for (DiskDef disk : disks) {
-            if (disk.getDeviceType() == DiskDef.DeviceType.CDROM && disk.getDiskLabel() == CONFIG_DRIVE_ISO_DISK_LABEL) {
+            if (disk.getDeviceType() == DiskDef.DeviceType.CDROM && disk.getDiskLabel().equals(CONFIG_DRIVE_ISO_DISK_LABEL)) {
                 configdrive = disk;
             }
         }
@@ -3415,7 +3415,7 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
             final List<DiskDef> disks = getDisks(conn, vmName);
             for (final DiskDef disk : disks) {
                 if (disk.getDeviceType() == DiskDef.DeviceType.CDROM
-                        && (diskSeq == null || disk.getDiskLabel() == iso.getDiskLabel())) {
+                        && (diskSeq == null || disk.getDiskLabel().equals(iso.getDiskLabel()))) {
                     cleanupDisk(disk);
                 }
             }
@@ -3991,7 +3991,7 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
             return stopVMInternal(conn, vmName, true);
         }
         String ret = stopVMInternal(conn, vmName, false);
-        if (ret == Script.ERR_TIMEOUT) {
+        if (ret.equals(Script.ERR_TIMEOUT)) {
             ret = stopVMInternal(conn, vmName, true);
         } else if (ret != null) {
             /*
