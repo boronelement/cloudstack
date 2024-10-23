@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.cloud.network.Networks.AddressFormat;
 import com.cloud.network.Networks.Mode;
 import com.cloud.utils.db.GenericDao;
+import org.apache.cloudstack.utils.reflectiontostringbuilderutils.ReflectionToStringBuilderUtils;
 
 @Entity
 @Table(name = "nics")
@@ -330,7 +331,10 @@ public class NicVO implements Nic {
 
     @Override
     public String toString() {
-        return String.format("Nic %s", ReflectionToStringBuilderUtils.reflectOnlySelectedFields(this, "id", "instanceId", "deviceId", "broadcastUri", "reservationId", "iPv4Address"));
+        return String.format("Nic %s",
+                ReflectionToStringBuilderUtils.reflectOnlySelectedFields(
+                        this, "id", "uuid", "instanceId",
+                        "deviceId", "broadcastUri", "reservationId", "iPv4Address"));
     }
 
     @Override
