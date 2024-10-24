@@ -76,6 +76,10 @@ public class ManagementServerResponse extends BaseResponse {
     @Param(description = "the IP Address for this Management Server")
     private String serviceIp;
 
+    @SerializedName(ApiConstants.AGENTS_COUNT)
+    @Param(description = "the number of host agents this Management Server is responsible for", since = "4.21.0.0")
+    private Long agentsCount;
+
     public String getId() {
         return this.id;
     }
@@ -118,6 +122,10 @@ public class ManagementServerResponse extends BaseResponse {
 
     public String getServiceIp() {
         return serviceIp;
+    }
+
+    public Long getAgentsCount() {
+        return this.agentsCount;
     }
 
     public void setId(String id) {
@@ -166,6 +174,10 @@ public class ManagementServerResponse extends BaseResponse {
 
     public void setServiceIp(String serviceIp) {
         this.serviceIp = serviceIp;
+    }
+
+    public void setAgentsCount(Long agentsCount) {
+        this.agentsCount = agentsCount;
     }
 
     public String getKernelVersion() {
