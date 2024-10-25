@@ -26,4 +26,8 @@ public interface ManagementServerHostPeerDao extends GenericDao<ManagementServer
     void updatePeerInfo(long ownerMshost, long peerMshost, long peerRunid, ManagementServerHost.State peerState);
 
     int countStateSeenInPeers(long mshost, long runid, ManagementServerHost.State state);
+
+    ManagementServerHostPeerVO findByOwnerAndPeerMsHost(long ownerMshost, long peerMshost, ManagementServerHost.State peerState);
+
+    ManagementServerHostPeerVO findByPeerMsAndState(long peerMshost, ManagementServerHost.State peerState);
 }

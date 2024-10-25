@@ -33,6 +33,8 @@ public class ManagementServerHostPeerDaoImpl extends GenericDaoBase<ManagementSe
     private final SearchBuilder<ManagementServerHostPeerVO> ClearPeerSearch;
     private final SearchBuilder<ManagementServerHostPeerVO> FindForUpdateSearch;
     private final SearchBuilder<ManagementServerHostPeerVO> CountSearch;
+    private final SearchBuilder<ManagementServerHostPeerVO> FindByOwnerAndPeerMsSearch;
+    private final SearchBuilder<ManagementServerHostPeerVO> FindByPeerMsAndStateSearch;
 
     public ManagementServerHostPeerDaoImpl() {
         ClearPeerSearch = createSearchBuilder();
@@ -50,6 +52,17 @@ public class ManagementServerHostPeerDaoImpl extends GenericDaoBase<ManagementSe
         CountSearch.and("peerRunid", CountSearch.entity().getPeerRunid(), SearchCriteria.Op.EQ);
         CountSearch.and("peerState", CountSearch.entity().getPeerState(), SearchCriteria.Op.EQ);
         CountSearch.done();
+
+        FindByOwnerAndPeerMsSearch = createSearchBuilder();
+        FindByOwnerAndPeerMsSearch.and("ownerMshost", FindByOwnerAndPeerMsSearch.entity().getOwnerMshost(), SearchCriteria.Op.EQ);
+        FindByOwnerAndPeerMsSearch.and("peerMshost", FindByOwnerAndPeerMsSearch.entity().getPeerMshost(), SearchCriteria.Op.EQ);
+        FindByOwnerAndPeerMsSearch.and("peerState", FindByOwnerAndPeerMsSearch.entity().getPeerState(), SearchCriteria.Op.EQ);
+        FindByOwnerAndPeerMsSearch.done();
+
+        FindByPeerMsAndStateSearch = createSearchBuilder();
+        FindByPeerMsAndStateSearch.and("peerMshost", FindByPeerMsAndStateSearch.entity().getPeerMshost(), SearchCriteria.Op.EQ);
+        FindByPeerMsAndStateSearch.and("peerState", FindByPeerMsAndStateSearch.entity().getPeerState(), SearchCriteria.Op.EQ);
+        FindByPeerMsAndStateSearch.done();
     }
 
     @Override
@@ -98,5 +111,24 @@ public class ManagementServerHostPeerDaoImpl extends GenericDaoBase<ManagementSe
 
         List<ManagementServerHostPeerVO> l = listBy(sc);
         return l.size();
+    }
+
+    @Override
+    public ManagementServerHostPeerVO findByOwnerAndPeerMsHost(long ownerMshost, long peerMshost, ManagementServerHost.State peerState) {
+        SearchCriteria<ManagementServerHostPeerVO> sc = FindByOwnerAndPeerMsSearch.create();
+        sc.setParameters("ownerMshost", ownerMshost);
+        sc.setParameters("peerMshost", peerMshost);
+        sc.setParameters("peerState", peerState);
+
+        return findOneBy(sc);
+    }
+
+    @Override
+    public ManagementServerHostPeerVO findByPeerMsAndState(long peerMshost, ManagementServerHost.State peerState) {
+        SearchCriteria<ManagementServerHostPeerVO> sc = FindByPeerMsAndStateSearch.create();
+        sc.setParameters("peerMshost", peerMshost);
+        sc.setParameters("peerState", peerState);
+
+        return findOneBy(sc);
     }
 }
